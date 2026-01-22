@@ -1,15 +1,17 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+import asyncio
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -19,16 +21,28 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Google Sheets Configuration
+GOOGLE_SHEET_ID = os.environ.get('GOOGLE_SHEET_ID')
+GOOGLE_SERVICE_ACCOUNT_EMAIL = os.environ.get('GOOGLE_SERVICE_ACCOUNT_EMAIL')
+GOOGLE_PRIVATE_KEY = os.environ.get('GOOGLE_PRIVATE_KEY', '').replace('\\n', '\n')
+
 # Create the main app without a prefix
 app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 # Define Models
 class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
+    model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
@@ -37,34 +51,127 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
-# Add your routes to the router instead of directly to app
+class EmailSubmission(BaseModel):
+    email: EmailStr
+
+class EmailSubmissionResponse(BaseModel):
+    success: bool
+    message: str
+
+
+# Google Sheets Helper
+def get_sheets_service():
+    """Create Google Sheets service using service account credentials."""
+    try:
+        credentials_info = {
+            "type": "service_account",
+            "project_id": "dev-solstice-485109-v1",
+            "private_key_id": "e18c64912ec11e310ef5db4a35d06f07e104d782",
+            "private_key": GOOGLE_PRIVATE_KEY,
+            "client_email": GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            "client_id": "115945659762757602942",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{GOOGLE_SERVICE_ACCOUNT_EMAIL.replace('@', '%40')}",
+            "universe_domain": "googleapis.com"
+        }
+        
+        credentials = service_account.Credentials.from_service_account_info(
+            credentials_info,
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+        
+        service = build('sheets', 'v4', credentials=credentials)
+        return service
+    except Exception as e:
+        logger.error(f"Failed to create Google Sheets service: {e}")
+        raise
+
+
+async def append_to_sheet(email: str, timestamp: str):
+    """Append email submission to Google Sheet."""
+    try:
+        def _append():
+            service = get_sheets_service()
+            values = [[email, timestamp, "QMDE Access Request"]]
+            body = {"values": values}
+            
+            result = service.spreadsheets().values().append(
+                spreadsheetId=GOOGLE_SHEET_ID,
+                range="Sheet1!A:C",
+                valueInputOption="RAW",
+                insertDataOption="INSERT_ROWS",
+                body=body
+            ).execute()
+            
+            return result
+        
+        # Run synchronous Google API call in thread pool
+        result = await asyncio.to_thread(_append)
+        logger.info(f"Successfully appended email to sheet: {email}")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to append to Google Sheet: {e}")
+        raise
+
+
+# Routes
 @api_router.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+@api_router.post("/submit-email", response_model=EmailSubmissionResponse)
+async def submit_email(submission: EmailSubmission):
+    """Submit email to Google Sheets for QMDE access request."""
+    try:
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        
+        # Append to Google Sheet
+        await append_to_sheet(submission.email, timestamp)
+        
+        # Also store in MongoDB for backup
+        await db.email_submissions.insert_one({
+            "email": submission.email,
+            "timestamp": timestamp,
+            "source": "QMDE Landing Page"
+        })
+        
+        return EmailSubmissionResponse(
+            success=True,
+            message="Application received. Review in 48-72 hours."
+        )
+    except Exception as e:
+        logger.error(f"Email submission failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to submit application. Please try again."
+        )
+
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.model_dump()
     status_obj = StatusCheck(**status_dict)
     
-    # Convert to dict and serialize datetime to ISO string for MongoDB
     doc = status_obj.model_dump()
     doc['timestamp'] = doc['timestamp'].isoformat()
     
     _ = await db.status_checks.insert_one(doc)
     return status_obj
 
+
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
     status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
     
-    # Convert ISO string timestamps back to datetime objects
     for check in status_checks:
         if isinstance(check['timestamp'], str):
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
     
     return status_checks
+
 
 # Include the router in the main app
 app.include_router(api_router)
@@ -77,12 +184,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
