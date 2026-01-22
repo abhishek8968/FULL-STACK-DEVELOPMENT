@@ -1,22 +1,37 @@
 import React, { useState } from 'react';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { finalCTAData } from '../../data/mock';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const FinalCTA = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
     
     setIsSubmitting(true);
-    setTimeout(() => {
+    setError('');
+    
+    try {
+      const response = await axios.post(`${API}/submit-email`, { email });
+      
+      if (response.data.success) {
+        setIsSubmitted(true);
+        setEmail('');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      setError('Failed to submit. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      setEmail('');
-    }, 1500);
+    }
   };
 
   return (
@@ -60,6 +75,9 @@ const FinalCTA = () => {
                   )}
                 </button>
               </div>
+              {error && (
+                <p className="text-red-400 text-sm mt-4">{error}</p>
+              )}
             </form>
           ) : (
             <div className="mt-10 p-5 bg-[#00FFD1]/5 border border-[#00FFD1]/20">
