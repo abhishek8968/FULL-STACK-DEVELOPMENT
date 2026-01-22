@@ -5,12 +5,20 @@ import { heroData } from '../../data/mock';
 import ParticleField from './animations/ParticleField';
 import GlowingOrb from './animations/GlowingOrb';
 import { TextReveal, FloatingElement } from './animations/AnimatedSection';
+import { MathBackground, GoldenSpiral, DataStream, WaveFunction } from './animations/ScienceElements';
 
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen bg-black flex items-center overflow-hidden">
+      {/* Science/Math Background Elements */}
+      <MathBackground />
+      <DataStream className="opacity-30" />
+      <GoldenSpiral className="top-20 right-20 opacity-20" size={300} />
+      <GoldenSpiral className="bottom-20 left-10 opacity-10" size={200} />
+      <WaveFunction className="bottom-40 left-0 right-0" />
+      
       {/* Particle Background */}
       <ParticleField />
       
@@ -66,6 +74,18 @@ const HeroSection = () => {
             >
               {heroData.subheadline}
             </motion.p>
+
+            {/* Formula Badge - For High IQ Appeal */}
+            <motion.div
+              className="inline-flex items-center gap-3 mb-8 px-4 py-2 border border-white/10 bg-white/5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+            >
+              <span className="text-[#00FFD1]/60 font-mono text-xs">Δp = ∫(∂M/∂t)dt</span>
+              <span className="text-white/30 text-xs">|</span>
+              <span className="text-white/40 text-xs">Momentum Pressure Integral</span>
+            </motion.div>
 
             {/* CTAs */}
             <motion.div 
