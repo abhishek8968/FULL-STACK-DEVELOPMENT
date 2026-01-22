@@ -170,3 +170,36 @@ export const CountUp = ({ end, duration = 2, suffix = '', prefix = '' }) => {
 
   return <span ref={ref}>{prefix}{count.toLocaleString()}{suffix}</span>;
 };
+
+export const CountDown = ({ start, end, duration = 2.5, suffix = '', prefix = '' }) => {
+  const [count, setCount] = React.useState(start);
+  const [hasAnimated, setHasAnimated] = React.useState(false);
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          let current = start;
+          const decrement = (start - end) / (duration * 60);
+          const timer = setInterval(() => {
+            current -= decrement;
+            if (current <= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(current));
+            }
+          }, 1000 / 60);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [start, end, duration, hasAnimated]);
+
+  return <span ref={ref}>{prefix}{count.toLocaleString('en-IN')}{suffix}</span>;
+};
