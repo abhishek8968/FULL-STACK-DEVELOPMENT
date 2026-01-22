@@ -3,10 +3,15 @@ import { motion } from 'framer-motion';
 import { architectureData } from '../../data/mock';
 import { FadeInUp, ScaleIn } from './animations/AnimatedSection';
 import GlowingOrb from './animations/GlowingOrb';
+import { GeometricPattern, MatrixRain } from './animations/ScienceElements';
 
 const Architecture = () => {
   return (
     <section id="architecture" className="bg-[#050505] py-20 lg:py-28 relative overflow-hidden">
+      {/* Science Background Elements */}
+      <GeometricPattern className="top-0 right-0 opacity-30" />
+      <MatrixRain className="opacity-10" />
+      
       {/* Background Elements */}
       <GlowingOrb size={500} className="top-0 right-0 opacity-30" />
       
@@ -23,6 +28,18 @@ const Architecture = () => {
           <p className="text-white/40 text-base mt-4 max-w-xl mx-auto">
             {architectureData.subtitle}
           </p>
+          
+          {/* Mathematical Formula */}
+          <motion.div 
+            className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-black/50 border border-white/10"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+          >
+            <span className="text-[#00FFD1]/50 font-mono text-xs">f(x) = Σᵢ wᵢ · σ(Wᵢx + bᵢ)</span>
+            <span className="text-white/20 text-xs">Multi-Layer Validation</span>
+          </motion.div>
         </FadeInUp>
 
         {/* Animated Architecture Flow */}
