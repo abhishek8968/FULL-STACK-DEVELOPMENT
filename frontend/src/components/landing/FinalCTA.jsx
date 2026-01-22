@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { finalCTAData } from '../../data/mock';
-import { FadeInUp, CountUp } from './animations/AnimatedSection';
+import { FadeInUp, CountDown } from './animations/AnimatedSection';
 import GlowingOrb from './animations/GlowingOrb';
+import { MathBackground, QuantumDots } from './animations/ScienceElements';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -38,6 +39,10 @@ const FinalCTA = () => {
 
   return (
     <section className="bg-[#050505] py-20 lg:py-28 border-t border-white/5 relative overflow-hidden">
+      {/* Science Background Elements */}
+      <MathBackground />
+      <QuantumDots className="opacity-30" />
+      
       {/* Background Effects */}
       <GlowingOrb size={500} className="top-0 left-1/4" />
       <GlowingOrb size={400} className="bottom-0 right-1/4" delay={2} />
@@ -68,10 +73,22 @@ const FinalCTA = () => {
               transition={{ duration: 3, repeat: Infinity, repeatDelay: 1 }}
             />
             
+            {/* Original Price - Struck through */}
+            <div className="mb-2">
+              <motion.span 
+                className="text-white/30 text-xl line-through"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+              >
+                ₹<CountDown start={1000000} end={1000000} duration={0.1} />
+              </motion.span>
+            </div>
+            
             <span className="text-white/30 text-xs uppercase tracking-wider">{finalCTAData.priceLabel}</span>
             
-            {/* Animated Price */}
-            <motion.p 
+            {/* Animated Price Countdown - 10 Lakh to 2 Lakh */}
+            <motion.div 
               className="text-[#00FFD1] text-5xl lg:text-6xl font-bold mt-2 tracking-tight"
               animate={{ 
                 textShadow: [
@@ -82,8 +99,19 @@ const FinalCTA = () => {
               }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              ₹<CountUp end={200000} duration={2} suffix="" />
-            </motion.p>
+              ₹<CountDown start={1000000} end={200000} duration={3} />
+            </motion.div>
+            
+            {/* Savings Badge */}
+            <motion.div 
+              className="inline-flex items-center gap-2 mt-3 px-3 py-1 bg-[#00FFD1]/10 border border-[#00FFD1]/30"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 3.5 }}
+            >
+              <span className="text-[#00FFD1] text-xs font-medium">80% VALUE OPTIMIZATION</span>
+            </motion.div>
             
             {/* Form */}
             {!isSubmitted ? (
