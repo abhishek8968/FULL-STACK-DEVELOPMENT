@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { footerData } from '../../data/mock';
 
 const Footer = () => {
@@ -18,9 +17,6 @@ const Footer = () => {
                 <span className="text-white/20 text-xs ml-3 hidden sm:inline">{footerData.tagline}</span>
               </div>
             </div>
-
-            {/* Locations */}
-            <div className="text-white/30 text-xs">{footerData.locations}</div>
 
             {/* Links */}
             <div className="flex flex-wrap gap-4 lg:gap-8">
