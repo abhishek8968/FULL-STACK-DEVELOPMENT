@@ -207,6 +207,5 @@ export const footerData = {
   company: "Rekkix",
   tagline: "Proprietary Trading Intelligence",
   disclaimer: "QMDE is a market analysis tool. Trading involves substantial risk. Past performance ≠ future results.",
-  copyright: "© 2025 Rekkix Ltd. All rights reserved.",
-  locations: "London · New York · Singapore · Zürich"
+  copyright: "© 2025 Rekkix. All rights reserved."
 };
