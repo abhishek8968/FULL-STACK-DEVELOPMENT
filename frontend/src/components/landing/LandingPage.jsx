@@ -8,6 +8,7 @@ import DivergenceSection from './DivergenceSection';
 import MarketRegime from './MarketRegime';
 import Reliability from './Reliability';
 import TargetAudience from './TargetAudience';
+import AboutSection from './AboutSection';
 import Exclusivity from './Exclusivity';
 import NotForEveryone from './NotForEveryone';
 import FinalCTA from './FinalCTA';
@@ -26,6 +27,7 @@ const LandingPage = () => {
         <MarketRegime />
         <Reliability />
         <TargetAudience />
+        <AboutSection />
         <Exclusivity />
         <NotForEveryone />
         <FinalCTA />
