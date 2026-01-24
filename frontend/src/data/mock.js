@@ -171,14 +171,19 @@ export const notForEveryoneData = {
 export const aboutData = {
   title: "About Rekkix",
   subtitle: "Two Decades of Market Intelligence",
-  description: "Rekkix is a global quantitative research firm headquartered in London, with operations spanning New York, Singapore, and Zürich. For over 20 years, we've developed proprietary trading systems for institutional clients, hedge funds, and sovereign wealth managers.",
-  stats: [
-    { value: "20+", label: "Years in Markets" },
-    { value: "4", label: "Global Offices" },
-    { value: "$2.8B", label: "Assets Analyzed Daily" },
-    { value: "127", label: "Institutional Clients" }
+  description: "Rekkix builds institutional-grade algorithmic systems, backtesting frameworks, and strategy integration tools. For over 20 years, we've engineered proprietary trading infrastructure for hedge funds, prop desks, and serious capital allocators.",
+  services: [
+    "Algorithmic System Development",
+    "Backtesting & Strategy Validation", 
+    "Platform Integration & APIs",
+    "Quantitative Advisory"
   ],
-  locations: ["London", "New York", "Singapore", "Zürich"]
+  stats: [
+    { value: "20+", label: "Years Experience" },
+    { value: "500+", label: "Strategies Deployed" },
+    { value: "$2.8B", label: "Capital Under Analysis" },
+    { value: "127", label: "Institutional Clients" }
+  ]
 };
 
 export const finalCTAData = {
