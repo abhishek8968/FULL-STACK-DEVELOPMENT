@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Building2, TrendingUp, Users } from 'lucide-react';
+import { Code2, BarChart3, Plug, Brain } from 'lucide-react';
 import { aboutData } from '../../data/mock';
 
-const statIcons = [TrendingUp, Building2, TrendingUp, Users];
+const serviceIcons = [Code2, BarChart3, Plug, Brain];
 
 const AboutSection = () => {
   return (
@@ -32,21 +32,24 @@ const AboutSection = () => {
               {aboutData.description}
             </p>
 
-            {/* Locations */}
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              {aboutData.locations.map((location, index) => (
-                <motion.div
-                  key={location}
-                  className="flex items-center gap-2 px-3 py-1.5 border border-white/10 bg-white/5"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <MapPin size={12} className="text-[#00FFD1]/60" />
-                  <span className="text-white/60 text-xs">{location}</span>
-                </motion.div>
-              ))}
+            {/* Services */}
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              {aboutData.services.map((service, index) => {
+                const Icon = serviceIcons[index];
+                return (
+                  <motion.div
+                    key={service}
+                    className="flex items-center gap-3 px-3 py-2.5 border border-white/5 bg-white/[0.02]"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Icon size={14} className="text-[#00FFD1]/60 flex-shrink-0" />
+                    <span className="text-white/60 text-xs">{service}</span>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
 
@@ -59,41 +62,20 @@ const AboutSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
-              {aboutData.stats.map((stat, index) => {
-                const Icon = statIcons[index];
-                return (
-                  <motion.div
-                    key={index}
-                    className="p-5 lg:p-6 bg-[#0a0a0a] border border-white/5 hover:border-[#00FFD1]/20 transition-colors group"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 + 0.3 }}
-                  >
-                    <Icon size={18} className="text-[#00FFD1]/40 mb-3 group-hover:text-[#00FFD1]/60 transition-colors" />
-                    <div className="text-[#00FFD1] text-2xl lg:text-3xl font-bold mb-1">{stat.value}</div>
-                    <div className="text-white/40 text-xs uppercase tracking-wider">{stat.label}</div>
-                  </motion.div>
-                );
-              })}
+              {aboutData.stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  className="p-5 lg:p-6 bg-[#0a0a0a] border border-white/5 hover:border-[#00FFD1]/20 transition-colors"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 + 0.3 }}
+                >
+                  <div className="text-[#00FFD1] text-2xl lg:text-3xl font-bold mb-1">{stat.value}</div>
+                  <div className="text-white/40 text-xs uppercase tracking-wider">{stat.label}</div>
+                </motion.div>
+              ))}
             </div>
-
-            {/* Trust Badge */}
-            <motion.div
-              className="mt-6 p-4 border border-white/5 bg-[#050505] flex items-center gap-4"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6 }}
-            >
-              <div className="w-10 h-10 bg-[#00FFD1]/10 flex items-center justify-center flex-shrink-0">
-                <Building2 size={18} className="text-[#00FFD1]" />
-              </div>
-              <div>
-                <p className="text-white/70 text-sm">Rekkix Ltd.</p>
-                <p className="text-white/30 text-xs">Registered in United Kingdom · Est. 2004</p>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </div>
